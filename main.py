@@ -82,27 +82,9 @@ def chat_id(im, text, driver):
         chat_id = chat.get_attribute("data-peer-id")
         return str(chat_id)
 
-def send_message(driver, text):
-    messagebox = driver.find_element(By.CSS_SELECTOR, 'div.input-message-input:nth-child(1)')
-    messagebox.send_keys(text)
-    messagebox.send_keys(Keys.ENTER)
-    sleep(1)
-    chatbox = driver.find_elements(By.CLASS_NAME, "bubble-content-wrapper")[-1]
-    day = chatbox.find_element(By.CLASS_NAME, "bubble-content")
-    try:
-        messagebox=day.find_element(By.CLASS_NAME, "message")
-    except:
-        return "Error in find_message"
-    else:
-        message = messagebox.get_attribute("innerHTML")
-        message = str(message)
-        message = message.replace('\u200c',' ')
-        db = str(message)
-        bd = db.split('<span class="time tgico"')
-        text = str(bd[0])
-        text = str(text)
-        return text, str(bd[1]), messagebox
-
+def send_message(driver, chat_id, text):
+    driver.execute_script('appMessagesManager.sendText('+str(chat_id)+', "'+str(text)+'")')
+    
 def reply_message(driver, text, message):
     action = ActionChains(driver)
     action.context_click(on_element = message)
@@ -482,3 +464,27 @@ def CheckMessage(messagebox_old, messagebox_new):
     else:
         return False
     
+def canSendToUser(driver, chat_id):
+    r = driver.execute_script("appUsersManager.canSendToUser("+str(chat_id)+")")
+    if str(r) == "True":
+        return True
+    else:
+        return False
+    
+def isUserOnline(driver, chat_id):
+    r = driver.execute_script("appUsersManager.isUserOnlineVisible("+str(chat_id)+")")
+    if str(r) == "True":
+        return True
+    else:
+        return False
+
+def getChat(driver):
+    r = driver.execute_script("appChatsManager.chats")
+    return str(r)
+
+def isContact(driver, chat_id):
+    r = driver.execute_script("appUsersManager.isContact("+str(chat_id)+")")
+    if str(r) == "True":
+        return True
+    else:
+        return False
